@@ -1,0 +1,61 @@
+version: '3'
+services:
+
+  server:
+    build:
+      context: ./
+      dockerfile: server.Dockerfile
+    image: client-auth/server
+    container_name: server
+    restart: unless-stopped
+    tty: true
+    environment:
+      SERVICE_NAME: server
+      SERVICE_TAGS: dev
+    ports:
+      - "5000:5000"
+    networks:
+      - network
+
+  client:
+    build:
+      context: ./
+      dockerfile: client.Dockerfile
+    image: client-auth/client
+    container_name: client
+    restart: unless-stopped
+    tty: true
+    environment:
+      SERVICE_NAME: client
+      SERVICE_TAGS: dev
+    ports:
+      - "5001:5001"
+    networks:
+      - network
+
+  mysql:
+    image: mysql:5.7
+    restart: always
+    container_name: mysql
+    environment:
+      SERVICE_NAME: mysql
+      SERVICE_TAGS: dev
+      MYSQL_DATABASE: 'db'
+      MYSQL_USER: 'default'
+      MYSQL_PASSWORD: 'secret'
+      MYSQL_ROOT_PASSWORD: 'secret'
+    ports:
+      - '13306:3306'
+    volumes:
+      - dbdata:/var/lib/mysql
+    networks:
+      - network
+
+#Docker Networks
+networks:
+  network:
+    driver: bridge
+
+volumes:
+  dbdata:
+    driver: local
